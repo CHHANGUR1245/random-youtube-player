@@ -1,56 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Random YouTube Video Player</title>
+  <title>Random YouTube Video with Ads</title>
   <style>
-    body {
-      text-align: center;
-      font-family: Arial, sans-serif;
-    }
-    iframe {
-      width: 80%;
-      height: 450px;
-      margin-top: 20px;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin-top: 20px;
-      cursor: pointer;
-    }
+    body { text-align: center; font-family: sans-serif; }
+    iframe { width: 80%; height: 450px; margin-top: 20px; }
+    button { padding: 10px 20px; font-size: 16px; margin-top: 20px; cursor: pointer; }
   </style>
 </head>
 <body>
-  <h1>🎥 Random YouTube Video Player</h1>
+  <h1>🎬 Random YouTube Video Player</h1>
   <div id="player"></div>
-  <button onclick="loadRandomVideo()">🔁 Load Another Random Video</button>
+  <button onclick="loadRandomVideo()">🔁 Play Another Video</button>
 
   <script src="https://www.youtube.com/iframe_api"></script>
-  <script src="videos.js"></script>
   <script>
     let player;
+    let videoList = [];
 
     function loadRandomVideo() {
-      const randomVideoId = videoList[Math.floor(Math.random() * videoList.length)];
+      if (videoList.length === 0) return;
+      const randomId = videoList[Math.floor(Math.random() * videoList.length)];
       if (player) {
-        player.loadVideoById(randomVideoId);
+        player.loadVideoById(randomId);
       } else {
-        player = new YT.Player("player", {
-          height: "390",
-          width: "640",
-          videoId: randomVideoId,
-          playerVars: {
-            autoplay: 1,
-            controls: 1,
-            rel: 0,
-            enablejsapi: 1
-          }
+        player = new YT.Player('player', {
+          videoId: randomId,
+          playerVars: { autoplay: 1, controls: 1, rel: 0 },
+          events: { onReady: e => e.target.playVideo() }
         });
       }
     }
 
     function onYouTubeIframeAPIReady() {
-      loadRandomVideo(); // auto-load one on first load
+      fetch('videos.txt')
+        .then(res => res.text())
+        .then(text => {
+          videoList = text.trim().split('\n');
+          loadRandomVideo();
+        });
     }
   </script>
 </body>
